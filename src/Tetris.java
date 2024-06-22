@@ -23,13 +23,14 @@ public class Tetris extends JPanel {
                     break;
 
                     case KeyEvent.VK_DOWN:
-                    down();
+                    drop();
                     break;
 
                     case KeyEvent.VK_UP:
                     rotate();
                     break;
                 }
+                repaint();
             }
         });
 
@@ -59,30 +60,54 @@ public class Tetris extends JPanel {
         }
     }
     private boolean down() {
-        if(!isCollision(curX, curY+1)) { // checks if it can move
+        if(!isCollision(curX, curY+1)) {
             curY++;
             return true;
         }
         return false;
     }
     private void move(int x) {
-        if(!isCollision(curX+x, curY)) { // checks if it can move
+        if(!isCollision(curX+x, curY)) {
             curX+=x;
         }
         repaint();
     }
     private void drop() {
-        while (down()); // keeps running until false
+        while (down());
         placeShape();
         clearRow();
         if (!spawnNewShape()) {
             timer.stop();
             JOptionPane.showMessageDialog(this, "Game Over");
         }
+        repaint();
     }
     private void rotate() {
-        // rotate shape
+        int[][] rotatedShape = new int[currentShape.getCoordinates().length][2];
+        for (int i = 0; i < currentShape.getCoordinates().length; i++) {
+            rotatedShape[i][0] = -currentShape.getCoordinates()[i][1];
+            rotatedShape[i][1] = currentShape.getCoordinates()[i][0];
+        }
+
+        boolean canRotate = true;
+        for (int[] coord : rotatedShape) {
+            int newX = curX + coord[0];
+            int newY = curY + coord[1];
+            if (newX < 0 || newX >= board[0].length || newY < 0 || newY >= board.length || board[newY][newX] != 0) {
+                canRotate = false;
+                break;
+            }
+        }
+
+        if (canRotate) {
+            for (int i = 0; i < currentShape.getCoordinates().length; i++) {
+                currentShape.getCoordinates()[i][0] = rotatedShape[i][0];
+                currentShape.getCoordinates()[i][1] = rotatedShape[i][1];
+            }
+        }
+        repaint();
     }
+
     private boolean isCollision(int x, int y) {
         for(int[] coord : currentShape.getCoordinates()) {
             int theX = x + coord[0];
@@ -113,9 +138,27 @@ public class Tetris extends JPanel {
         drawShape(g);
     }
     private void drawBoard(Graphics g) {
-        
+        for (int y = 0; y < board.length; y++) {
+            for (int x = 0; x < board[y].length; x++) {
+                if (board[y][x] != 0) {
+                    g.setColor(Color.BLUE);
+                    g.fillRect(x * 30, y * 30, 30, 30);
+                    g.setColor(Color.BLACK);
+                    g.drawRect(x * 30, y * 30, 30, 30);
+                }
+            }
+        }
     }
-    private void drawShape(Graphics g) {
 
+    private void drawShape(Graphics g) {
+        g.setColor(Color.RED);
+        for (int[] coord : currentShape.getCoordinates()) {
+            int x = curX + coord[0];
+            int y = curY + coord[1];
+            g.fillRect(x * 30, y * 30, 30, 30);
+            g.setColor(Color.BLACK);
+            g.drawRect(x * 30, y * 30, 30, 30);
+            g.setColor(Color.RED);
+        }
     }
 }
