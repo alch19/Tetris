@@ -10,6 +10,7 @@ public class Main {
         frame.setLocationRelativeTo(null);
         frame.setSize(400,800);
         frame.add(game);
+        frame.setResizable(false);
         frame.setVisible(true);
     }
 }

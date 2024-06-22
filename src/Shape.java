@@ -12,7 +12,10 @@ public class Shape {
     private int[][] coords;
 
     public Shape() {
-        coords = shapes[new Random().nextInt(shapes.length)];
-        
+        this.coords = shapes[new Random().nextInt(shapes.length)];
+    }
+
+    public int[][] getCoordinates() {
+        return this.coords;
     }
 }
