@@ -1,3 +1,5 @@
+import java.awt.BorderLayout;
+
 import javax.swing.*;
 
 public class Main {
@@ -5,12 +7,17 @@ public class Main {
         Tetris game = new Tetris();
         JFrame frame = new JFrame("Tetris");
 
-        
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
         frame.setSize(400,800);
-        frame.add(game);
+        frame.setLocationRelativeTo(null);
+
+        JPanel container = new JPanel(new BorderLayout());
+        container.add(game, BorderLayout.CENTER);
+        
         frame.setResizable(false);
+        frame.add(container);
         frame.setVisible(true);
+
+        game.start();
     }
 }

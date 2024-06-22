@@ -8,9 +8,13 @@ public class Tetris extends JPanel {
     private int curX;
     private int curY;
     private Timer timer;
+    private final int blockSize = 30;
+    private final int width = blockSize * board[0].length;
+    private final int height = blockSize * board.length;
 
     public Tetris() {
         setFocusable(true);
+        setPreferredSize(new Dimension(width, height)); 
         addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
                 switch(e.getKeyCode()) {
@@ -82,6 +86,7 @@ public class Tetris extends JPanel {
         }
         repaint();
     }
+
     private void rotate() {
         int[][] rotatedShape = new int[currentShape.getCoordinates().length][2];
         for (int i = 0; i < currentShape.getCoordinates().length; i++) {
@@ -136,29 +141,46 @@ public class Tetris extends JPanel {
         super.paintComponent(g);
         drawBoard(g);
         drawShape(g);
+        drawGridLines(g);
     }
     private void drawBoard(Graphics g) {
+        int offsetX = (getWidth()-width)/2;
+        int offsetY = (getHeight()-height)/2;
         for (int y = 0; y < board.length; y++) {
             for (int x = 0; x < board[y].length; x++) {
                 if (board[y][x] != 0) {
                     g.setColor(Color.BLUE);
-                    g.fillRect(x * 30, y * 30, 30, 30);
+                    g.fillRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
                     g.setColor(Color.BLACK);
-                    g.drawRect(x * 30, y * 30, 30, 30);
+                    g.drawRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
                 }
             }
         }
     }
 
     private void drawShape(Graphics g) {
+        int offsetX = (getWidth() - width) / 2; 
+        int offsetY = (getHeight() - height) / 2;
         g.setColor(Color.RED);
         for (int[] coord : currentShape.getCoordinates()) {
             int x = curX + coord[0];
             int y = curY + coord[1];
-            g.fillRect(x * 30, y * 30, 30, 30);
+            g.fillRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
             g.setColor(Color.BLACK);
-            g.drawRect(x * 30, y * 30, 30, 30);
+            g.drawRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
             g.setColor(Color.RED);
+        }
+    }
+
+    private void drawGridLines(Graphics g) {
+        int offsetX = (getWidth() - width) / 2;
+        int offsetY = (getHeight() - height) / 2;
+        g.setColor(Color.LIGHT_GRAY);
+        for (int y = 0; y <= board.length; y++) {
+            g.drawLine(offsetX, offsetY + y * blockSize, offsetX + width, offsetY + y * blockSize);
+        }
+        for (int x = 0; x <= board[0].length; x++) {
+            g.drawLine(offsetX + x * blockSize, offsetY, offsetX + x * blockSize, offsetY + height);
         }
     }
 }
