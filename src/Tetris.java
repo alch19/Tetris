@@ -27,7 +27,7 @@ public class Tetris extends JPanel {
                     break;
 
                     case KeyEvent.VK_DOWN:
-                    drop();
+                    stepDown();
                     break;
 
                     case KeyEvent.VK_UP:
@@ -76,15 +76,16 @@ public class Tetris extends JPanel {
         }
         repaint();
     }
-    private void drop() {
-        while (down());
-        placeShape();
-        clearRow();
-        if (!spawnNewShape()) {
-            timer.stop();
-            JOptionPane.showMessageDialog(this, "Game Over");
+    private void stepDown() {
+        if(!down()) {
+            placeShape();
+            clearRow();
+            if (!spawnNewShape()) {
+                timer.stop();
+                JOptionPane.showMessageDialog(this, "Game Over");
+            }
+            repaint();
         }
-        repaint();
     }
 
     private void rotate() {
@@ -129,7 +130,25 @@ public class Tetris extends JPanel {
         }
     }
     private void clearRow() {
-        // clear row
+        for(int i=0; i<board.length; i++) {
+            boolean lineFull = true;
+            for(int j=0; j<board[i].length; j++) {
+                if(board[i][j] == 0) {
+                    lineFull = false;
+                    break;
+                }
+            }
+            if(lineFull) {
+                for(int k=i; k>0; k--) {
+                    for(int x=0; x<board[k].length; x++) {
+                        board[k][x]=board[k-1][x];
+                    }
+                }
+                for(int x=0; x<board[0].length; x++) {
+                    board[0][x]=0;
+                }
+            }
+        }
     }
     private boolean spawnNewShape() {
         this.currentShape = new Shape();
