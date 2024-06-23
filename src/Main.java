@@ -8,14 +8,14 @@ public class Main {
         JFrame frame = new JFrame("Tetris");
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(300,700);
+        frame.setSize(300,800);
         frame.setLocationRelativeTo(null);
 
         JPanel container = new JPanel(new BorderLayout());
         container.add(game, BorderLayout.CENTER);
         
         frame.setResizable(false);
-        frame.add(container);
+        frame.add(container, BorderLayout.SOUTH);
         frame.setVisible(true);
 
         game.start();

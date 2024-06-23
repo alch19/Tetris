@@ -5,6 +5,9 @@ import java.awt.event.*;
 public class Tetris extends JPanel {
     private int[][] board = new int[20][10];
     private Shape currentShape;
+    private Shape nextShape;
+    private Shape heldShape=null;
+    private boolean isHolding=false;
     private int curX;
     private int curY;
     private Timer timer;
@@ -15,7 +18,7 @@ public class Tetris extends JPanel {
 
     public Tetris() {
         setFocusable(true);
-        setPreferredSize(new Dimension(width, height)); 
+        setPreferredSize(new Dimension(width, height+100)); 
 
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
             @Override
@@ -29,7 +32,10 @@ public class Tetris extends JPanel {
                         keyPressedDown = true;
                     } else if (e.getKeyCode() == KeyEvent.VK_UP) {
                         rotate();
+                    } else if (e.getKeyCode() == KeyEvent.VK_R) {
+                        holdPiece();
                     }
+
                 } else if (e.getID() == KeyEvent.KEY_RELEASED) {
                     if (e.getKeyCode() == KeyEvent.VK_DOWN) {
                         keyPressedDown = false;
@@ -67,7 +73,26 @@ public class Tetris extends JPanel {
         downTimer.start();
     }
 
+    private void holdPiece() {
+        if(isHolding==false) {
+            return;
+        }
+        if(heldShape==null) {
+            heldShape=currentShape;
+            currentShape=nextShape;
+            nextShape=new Shape();
+        } else {
+            Shape temp = currentShape;
+            currentShape = heldShape;
+            heldShape=temp;
+        }
+        curX=3;
+        curY=0;
+        isHolding=true;
+    }
+
     private void updateGameState() {
+        isHolding=false;
         if(!down()) {
             placeShape();
             clearRow();
@@ -171,14 +196,12 @@ public class Tetris extends JPanel {
         this.currentShape = new Shape();
         curX = 3;
         curY = 0;
-        int i=0;
-        while(isCollision(curX, curY)) {
-            curY++;
-            i++;
-            if(i==height) {
-                break;
-            }
+        for (int i = 0; i < board.length; i++) {
+        if (!isCollision(curX, curY)) {
+            break;
         }
+        curY++;
+    }
         if(isCollision(curX,curY)) {
             return false;
         }
@@ -189,6 +212,8 @@ public class Tetris extends JPanel {
         drawBoard(g);
         drawShape(g);
         drawGridLines(g);
+        drawNextPiece(g);
+        drawHoldPiece(g);
     }
     private void drawBoard(Graphics g) {
         int offsetX = (getWidth()-width)/2;
@@ -229,5 +254,38 @@ public class Tetris extends JPanel {
         for (int x = 0; x <= board[0].length; x++) {
             g.drawLine(offsetX + x * blockSize, offsetY, offsetX + x * blockSize, offsetY + height);
         }
+    }
+
+    private void drawNextPiece(Graphics g) {
+        int offsetX = (getWidth() - width) / 2 + width + 20;
+        int offsetY = 20;
+        g.setColor(Color.GREEN);
+        for (int[] coord : nextShape.getCoordinates()) {
+            int x = coord[0];
+            int y = coord[1];
+            g.fillRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
+            g.setColor(Color.BLACK);
+            g.drawRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
+            g.setColor(Color.GREEN);
+        }
+        g.setColor(Color.BLACK);
+        g.drawString("Next Piece", offsetX, offsetY - 10);
+    }
+
+    private void drawHoldPiece(Graphics g) {
+        if (heldShape == null) return;
+        int offsetX = (getWidth() - width) / 2 - 120;
+        int offsetY = 20;
+        g.setColor(Color.YELLOW);
+        for (int[] coord : heldShape.getCoordinates()) {
+            int x = coord[0];
+            int y = coord[1];
+            g.fillRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
+            g.setColor(Color.BLACK);
+            g.drawRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
+            g.setColor(Color.YELLOW);
+        }
+        g.setColor(Color.BLACK);
+        g.drawString("Hold Piece", offsetX, offsetY - 10);
     }
 }
