@@ -7,7 +7,7 @@ public class Tetris extends JPanel {
     private Shape currentShape;
     private Shape nextShape;
     private Shape heldShape=null;
-    private boolean isHolding=false;
+    private boolean canHold=true;
     private int curX;
     private int curY;
     private Timer timer;
@@ -18,7 +18,7 @@ public class Tetris extends JPanel {
 
     public Tetris() {
         setFocusable(true);
-        setPreferredSize(new Dimension(width, height+100)); 
+        setPreferredSize(new Dimension(width, height+200)); 
 
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
             @Override
@@ -47,6 +47,7 @@ public class Tetris extends JPanel {
         });
 
         currentShape = new Shape();
+        nextShape = new Shape();
         curX=3;
         curY=0;
     }
@@ -74,7 +75,7 @@ public class Tetris extends JPanel {
     }
 
     private void holdPiece() {
-        if(isHolding==false) {
+        if(!canHold) {
             return;
         }
         if(heldShape==null) {
@@ -88,11 +89,11 @@ public class Tetris extends JPanel {
         }
         curX=3;
         curY=0;
-        isHolding=true;
+        canHold=false;
     }
 
     private void updateGameState() {
-        isHolding=false;
+        canHold=true;
         if(!down()) {
             placeShape();
             clearRow();
@@ -193,15 +194,16 @@ public class Tetris extends JPanel {
         }
     }
     private boolean spawnNewShape() {
-        this.currentShape = new Shape();
+        currentShape=nextShape;
+        this.nextShape = new Shape();
         curX = 3;
         curY = 0;
         for (int i = 0; i < board.length; i++) {
-        if (!isCollision(curX, curY)) {
-            break;
+            if (!isCollision(curX, curY)) {
+                break;
+            }
+            curY++;
         }
-        curY++;
-    }
         if(isCollision(curX,curY)) {
             return false;
         }
@@ -257,7 +259,7 @@ public class Tetris extends JPanel {
     }
 
     private void drawNextPiece(Graphics g) {
-        int offsetX = (getWidth() - width) / 2 + width + 20;
+        int offsetX = 20;
         int offsetY = 20;
         g.setColor(Color.GREEN);
         for (int[] coord : nextShape.getCoordinates()) {
@@ -274,7 +276,7 @@ public class Tetris extends JPanel {
 
     private void drawHoldPiece(Graphics g) {
         if (heldShape == null) return;
-        int offsetX = (getWidth() - width) / 2 - 120;
+        int offsetX = getWidth() - (4 * blockSize + 40);;
         int offsetY = 20;
         g.setColor(Color.YELLOW);
         for (int[] coord : heldShape.getCoordinates()) {
@@ -286,6 +288,6 @@ public class Tetris extends JPanel {
             g.setColor(Color.YELLOW);
         }
         g.setColor(Color.BLACK);
-        g.drawString("Hold Piece", offsetX, offsetY - 10);
+        g.drawString("Held Piece", offsetX, offsetY - 10);
     }
 }

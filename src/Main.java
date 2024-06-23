@@ -8,7 +8,7 @@ public class Main {
         JFrame frame = new JFrame("Tetris");
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(300,800);
+        frame.setSize(300,900);
         frame.setLocationRelativeTo(null);
 
         JPanel container = new JPanel(new BorderLayout());
