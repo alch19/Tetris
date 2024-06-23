@@ -11,30 +11,32 @@ public class Tetris extends JPanel {
     private final int blockSize = 30;
     private final int width = blockSize * board[0].length;
     private final int height = blockSize * board.length;
+    private boolean keyPressedDown = false;
 
     public Tetris() {
         setFocusable(true);
         setPreferredSize(new Dimension(width, height)); 
-        addKeyListener(new KeyAdapter() {
-            public void keyPressed(KeyEvent e) {
-                switch(e.getKeyCode()) {
-                    case KeyEvent.VK_LEFT:
-                    move(-1);
-                    break;
 
-                    case KeyEvent.VK_RIGHT:
-                    move(1);
-                    break;
-
-                    case KeyEvent.VK_DOWN:
-                    stepDown();
-                    break;
-
-                    case KeyEvent.VK_UP:
-                    rotate();
-                    break;
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
+            @Override
+            public boolean dispatchKeyEvent(KeyEvent e) {
+                if (e.getID() == KeyEvent.KEY_PRESSED) {
+                    if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+                        move(-1);
+                    } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+                        move(1);
+                    } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                        keyPressedDown = true;
+                    } else if (e.getKeyCode() == KeyEvent.VK_UP) {
+                        rotate();
+                    }
+                } else if (e.getID() == KeyEvent.KEY_RELEASED) {
+                    if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                        keyPressedDown = false;
+                    }
                 }
                 repaint();
+                return false;
             }
         });
 
@@ -46,11 +48,23 @@ public class Tetris extends JPanel {
     public void start() {
         timer = new Timer(500, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                updateGameState();
+                if(keyPressedDown==false) {
+                    updateGameState();
+                }
                 repaint();
             }
         });
         timer.start();
+
+        Timer downTimer = new Timer(50, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (keyPressedDown) {
+                    stepDown();
+                }
+                repaint();
+            }
+        });
+        downTimer.start();
     }
 
     private void updateGameState() {
@@ -115,15 +129,18 @@ public class Tetris extends JPanel {
     }
 
     private boolean isCollision(int x, int y) {
-        for(int[] coord : currentShape.getCoordinates()) {
+        for (int[] coord : currentShape.getCoordinates()) {
             int theX = x + coord[0];
             int theY = y + coord[1];
+            System.out.println("Checking collision at (" + theX + ", " + theY + ")");
             if (theX < 0 || theX >= board[0].length || theY < 0 || theY >= board.length || board[theY][theX] != 0) {
+                System.out.println("Collision detected at (" + theX + ", " + theY + ")");
                 return true;
             }
         }
         return false;
     }
+
     private void placeShape() {
         for(int[] coord : currentShape.getCoordinates()) {
             board[curY + coord[1]][curX+coord[0]] = 1;
@@ -154,7 +171,18 @@ public class Tetris extends JPanel {
         this.currentShape = new Shape();
         curX = 3;
         curY = 0;
-        return !isCollision(curX, curY);
+        int i=0;
+        while(isCollision(curX, curY)) {
+            curY++;
+            i++;
+            if(i==height) {
+                break;
+            }
+        }
+        if(isCollision(curX,curY)) {
+            return false;
+        }
+        return true;
     }
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
